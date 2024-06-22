@@ -1,19 +1,20 @@
-let zoomLevel = 2;
+let entitySize = 10;
 let entityColor = "#99ffff";
-let targetColor = "#444444";
 let barrierColor = "#99ffff";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
+let simulationSizeX = 800;
+let simulationSizeY = 600;
+
 let barriers = [];
 let entities = [];
-let target = { x: 50, y: 50 };
+let target;
 
 let barriersStorageKey = "barriers";
 let entitiesStorageKey = "entities";
 let targetStorageKey = "target";
-
 
 let playing = false;
 let viewRoot = { x: 0, y: 0 };
@@ -38,6 +39,7 @@ function init(newWidth, newHeight) {
     if (newHeight && newHeight > 0) {
         simulationSizeY = newHeight;
     }
+    target = new Target(simulationSizeX / 2, 50, 40, "#ff0000");
     controls.style = `height: ${controlsHeight}px; width: 100%;`;
 }
 
@@ -49,14 +51,20 @@ function reset() {
 
 function redraw() {
     resize();
+    drawGrid();
     drawTarget();
-    // drawEntities();
+    drawEntities();
+}
+
+function drawGrid() {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(viewRoot.x, viewRoot.y, simulationSizeX, simulationSizeY);
 }
 
 function drawTarget() {
     if (target) {
-        ctx.fillStyle = targetColor;
-        ctx.fillRect(target.x, target.y, zoomLevel, zoomLevel);
+        ctx.fillStyle = target.targetColor;
+        ctx.fillRect(target.x, target.y, target.targetSize, target.targetSize);
     }
 
 }
@@ -66,10 +74,8 @@ function drawBarriers() {
 }
 
 function drawEntities() {
-    ctx.fillStyle = "#000";
-    ctx.fillRect(viewRoot.x, viewRoot.y, simulationSizeX * zoomLevel, simulationSizeY * zoomLevel);
     for (let i = 0; i < entities.length; i++) {
-        let x = entities[i].x * zoomLevel + viewRoot.x;
+        let x = entities[i].x * entitySize + viewRoot.x;
         if (x > canvas.length) {
             break;
         }
@@ -77,7 +83,7 @@ function drawEntities() {
             continue;
         }
         for (let j = 0; j < entities.length; j++) {
-            let y = j * zoomLevel + viewRoot.y;
+            let y = j * entitySize + viewRoot.y;
             if (y > canvas.width) {
                 break;
             }
@@ -86,11 +92,12 @@ function drawEntities() {
             }
             if (entities[i]) {
                 ctx.fillStyle = entities[i].entityColor;
-                ctx.fillRect(x, y, zoomLevel, zoomLevel);
+                ctx.fillRect(x, y, entitySize, entitySize);
             }
         }
     }
 }
+
 
 let lastI = -1;
 let lastJ = -1;
@@ -98,32 +105,6 @@ let lastPos = { x: null, y: null };
 let mouseIsPressed = false;
 let mouseButtonPressed = 0;
 let setTo = 1;
-
-function convertPositionToIndex(x, y) {
-    y = y - controlsHeight - viewRoot.y;
-    x = x - viewRoot.x;
-    let i = parseInt(x / zoomLevel);
-    let j = parseInt(y / zoomLevel);
-    return {
-        i: i,
-        j: j
-    }
-}
-
-function getNodeAtPosition(x, y) {
-    //TODO
-    // let pos = convertPositionToIndex(x, y)
-    // if (pos.i < 0 || pos.i >= simulationSizeX || pos.j < 0 || pos.j >= simulationSizeY) {
-    //     return;
-    // }
-    // return {
-    //     x: x,
-    //     y: y,
-    //     i: pos.i,
-    //     j: pos.j,
-    //     value: entities[pos.i]
-    // }
-}
 
 canvas.addEventListener('mousedown', function (e) {
     mouseIsPressed = true;
@@ -146,14 +127,7 @@ canvas.addEventListener('mousemove', function (e) {
         return;
     }
     if (mouseButtonPressed == 0) {
-        if (drawing) {
-            mouseDrawing(e)
-        } else if (panning) {
-            mousePanning(e);
-        }
-    }
-    if (mouseButtonPressed == 1) {
-        mousePanning(e);
+        mouseDrawing(e)
     }
 });
 
@@ -162,11 +136,6 @@ function mouseDrawing(e) {
     let xEnd = e.clientX;
     let yStart = lastPos.y;
     let yEnd = e.clientY;
-    let nodes = getNodesAtPositions(xStart, xEnd, yStart, yEnd);
-    for (let index = 0; index < nodes.length; index++) {
-        const node = nodes[index];
-        setValue(node, setTo);
-    }
     if (!playing) {
         redraw();
     }
@@ -174,41 +143,7 @@ function mouseDrawing(e) {
     lastPos.y = e.clientY;
 }
 
-function mousePanning(e) {
-    let difX = e.clientX - lastPos.x;
-    let difY = e.clientY - lastPos.y;
-    if (difX != 0 || difY != 0) {
-        viewRoot.x = viewRoot.x + difX;
-        viewRoot.y = viewRoot.y + difY;
-        let minPosX = (-simulationSizeX * zoomLevel) + zoomLevel;
-        let minPosY = (-simulationSizeY * zoomLevel) + zoomLevel;
-        let maxPosX = canvas.width - zoomLevel;
-        let maxPosY = canvas.height - zoomLevel;
-        if (viewRoot.x < minPosX) {
-            viewRoot.x = minPosX;
-        }
-        if (viewRoot.y < minPosY) {
-            viewRoot.y = minPosY;
-        }
-        if (viewRoot.x > maxPosX) {
-            viewRoot.x = maxPosX;
-        }
-        if (viewRoot.y > maxPosY) {
-            viewRoot.y = maxPosY;
-        }
-        lastPos.x = e.clientX;
-        lastPos.y = e.clientY;
-        redraw();
-    }
-}
-
 reset();
-
-function doOneStep() {
-    playing = false;
-    switchButtons();
-    step();
-}
 
 function step() {
     //TODO
@@ -262,7 +197,8 @@ function save() {
 function clearSimulation() {
     entities = [];
     barriers = [];
-    target = new Target(50, 50);
+    target = null;
+    init(simulationSizeX, simulationSizeY);
 }
 
 async function debounce(func, timeout = 300) {
@@ -277,12 +213,3 @@ async function debounce(func, timeout = 300) {
         }, timeout);
     };
 }
-
-canvas.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    if (e.deltaY > 0) {
-        zoomPlus()
-    } else {
-        zoomLess()
-    }
-});

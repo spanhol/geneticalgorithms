@@ -17,17 +17,6 @@
                 class="fa-solid fa-play icon-size-25p"></i></button>
         <button onclick="stop()" type="button" title="Stop" class="btn btn-primary margin-top margin-left"
             style="display: none;" id="stop"><i class="fa-solid fa-stop icon-size-25p"></i></button>
-        <button onclick="doOneStep()" type="button" title="Step through" class="btn btn-primary margin-top margin-right"
-            id="play"><i class="fa-solid fa-forward-step icon-size-25p"></i></button>
-        <button onclick="selectDrawTool()" type="button" title="Draw tool" class="btn btn-primary margin-top"
-            id="drawtool"><i class="fa-solid fa-pencil icon-size-25p"></i></button>
-        <button onclick="selectPanTool()" type="button" title="Pan tool"
-            class="btn btn-secondary margin-top  margin-right" id="pantool"><i
-                class="fa-solid fa-hand icon-size-25p"></i></button>
-        <button onclick="zoomLess()" type="button" title="Zoom out" class="btn btn-primary margin-top " id="zoomplus"><i
-                class="fa-solid fa-plus icon-size-25p"></i></button>
-        <button onclick="zoomPlus()" type="button" title="Zoom in" class="btn btn-primary margin-top margin-right"
-            id="zoomless"><i class="fa-solid fa-minus icon-size-25p"></i></button>
         <button onclick="save()" type="button" title="Save current state" class="btn btn-primary margin-top "
             id="saveGameState"><i class="fa-solid fa-save icon-size-25p"></i></button>
         <button onclick="load()" type="button" title="Load saved state" class="btn btn-primary margin-top"
@@ -56,25 +45,26 @@
                 <h1>Runtime</h1>
                 <label for="speed" class="form-label">Ticks per second:</label>
                 <input type="number" id="speed" class="form-control">
-            <div class="form-padding">
-                <h1>Grid</h1>
-                <div class="row">
-                    <div class="col">
-                        <label for="gridx" class="form-label">Width</label>
-                        <input type="number" id="gridx" class="form-control">
-                    </div>
-                    <div class="col">
-                        <label for="gridy" class="form-label">Height</label>
-                        <input type="number" id="gridy" class="form-control">
+                <div class="form-padding">
+                    <h1>Grid</h1>
+                    <div class="row">
+                        <div class="col">
+                            <label for="gridx" class="form-label">Width</label>
+                            <input type="number" id="gridx" class="form-control">
+                        </div>
+                        <div class="col">
+                            <label for="gridy" class="form-label">Height</label>
+                            <input type="number" id="gridy" class="form-control">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <button onclick="applySettings()" type="button" class="btn btn-primary margin-top "
-            style="margin: 15px 15px 15px 10px; float: right;" id="applySettings">Close</button>
+            <button onclick="applySettings()" type="button" class="btn btn-primary margin-top "
+                style="margin: 15px 15px 15px 10px; float: right;" id="applySettings">Close</button>
     </dialog>
     <script src="ui.js"></script>
     <script src="entity.js"></script>
+    <script src="target.js"></script>
     <script src="game.js"></script>
 </body>
 
