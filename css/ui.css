@@ -1,0 +1,48 @@
+h1 {
+    margin-top: 15px;
+}
+
+.controls-button {
+    margin: 10px 0 0 10px;
+}
+
+.margin-top {
+    margin-top: 10px;
+}
+
+.margin-right {
+    margin-right: 10px;
+}
+
+.margin-bottom {
+    margin-bottom: 10px;
+}
+
+.margin-left {
+    margin-left: 10px;
+}
+
+.icon-size-25p {
+    width: 25px;
+}
+
+dialog {
+    border: none;
+    box-shadow: #00000029 2px 2px 5px 2px;
+    border-radius: 2px;
+    padding: 30px;
+    top: 60px;
+    bottom: 50px;
+    left: calc(35% - 20px - 2em);
+    width: 30%;
+    min-height: 30%;
+    margin: 100px 100px;
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.form-padding {
+    padding: 5px 15px 5px 15px;
+}
