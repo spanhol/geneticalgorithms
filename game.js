@@ -1,6 +1,4 @@
 let entitySize = 10;
-let entityColor = "#99ffff";
-let barrierColor = "#99ffff";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -8,11 +6,13 @@ const ctx = canvas.getContext("2d");
 let simulationSizeX = 800;
 let simulationSizeY = 600;
 
-let barriers = [];
+let simulationFrame = 0;
+
+let obstacles = [];
 let entities = [];
 let target;
 
-let barriersStorageKey = "barriers";
+let obstaclesStorageKey = "obstacles";
 let entitiesStorageKey = "entities";
 let targetStorageKey = "target";
 
@@ -40,6 +40,11 @@ function init(newWidth, newHeight) {
         simulationSizeY = newHeight;
     }
     target = new Target(simulationSizeX / 2, 50, 40, "#ff0000");
+
+    for (let i = 0; i < 50; i++) {
+        let entity = new Entity(simulationSizeX / 2, simulationSizeY - 20, 20, "#009900", new Dna(100, 0.01));
+        entities.push(entity);
+    }
     controls.style = `height: ${controlsHeight}px; width: 100%;`;
 }
 
@@ -63,38 +68,36 @@ function drawGrid() {
 
 function drawTarget() {
     if (target) {
-        ctx.fillStyle = target.targetColor;
-        ctx.fillRect(target.x, target.y, target.targetSize, target.targetSize);
+        ctx.fillStyle = target.color;
+        ctx.fillRect(target.x, target.y, target.size, target.size);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(target.x + 4, target.y + 4, target.size - 8, target.size - 8);
     }
-
 }
 
-function drawBarriers() {
-
+function drawObstacles() {
+    for (let i = 0; i < obstacles.length; i++) {
+        if (obstacles[i].x < 0 || obstacles[i].x > canvas.width
+            || obstacles[i].y < 0 || obstacles[i].y > canvas.height) {
+            continue;
+        }
+        ctx.fillStyle = obstacles[i].color;
+        ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+    }
 }
 
 function drawEntities() {
     for (let i = 0; i < entities.length; i++) {
-        let x = entities[i].x * entitySize + viewRoot.x;
-        if (x > canvas.length) {
-            break;
-        }
-        if (x < 0) {
+        if (entities[i].x < 0 || entities[i].x > canvas.width
+            || entities[i].y < 0 || entities[i].y > canvas.height) {
             continue;
         }
-        for (let j = 0; j < entities.length; j++) {
-            let y = j * entitySize + viewRoot.y;
-            if (y > canvas.width) {
-                break;
-            }
-            if (y < 0) {
-                continue;
-            }
-            if (entities[i]) {
-                ctx.fillStyle = entities[i].entityColor;
-                ctx.fillRect(x, y, entitySize, entitySize);
-            }
-        }
+        ctx.fillStyle = entities[i].color;
+        let path = new Path2D();
+        path.moveTo((entities[i].x) + entities[i].size / 3, entities[i].y);
+        path.lineTo((entities[i].x), entities[i].y - entities[i].size);
+        path.lineTo((entities[i].x) - entities[i].size / 3, entities[i].y);
+        ctx.fill(path);
     }
 }
 
@@ -146,7 +149,12 @@ function mouseDrawing(e) {
 reset();
 
 function step() {
-    //TODO
+    for (let i = 0; i < entities.length; i++) {
+        console.log(entities[i]);
+        // console.log(entities[i].dna.genes[simulationFrame]);
+    }
+
+    simulationFrame++;
     debounce(redraw());
 };
 
@@ -179,8 +187,8 @@ async function sleep(ms) {
 }
 
 function load() {
-    barriers = JSON.parse(localStorage.getItem(barriersStorageKey));
-    console.log(barriers);
+    obstacles = JSON.parse(localStorage.getItem(obstaclesStorageKey));
+    console.log(obstacles);
     entities = JSON.parse(localStorage.getItem(entitiesStorageKey));
     console.log(entities);
     target = JSON.parse(localStorage.getItem(targetStorageKey));
@@ -190,13 +198,13 @@ function load() {
 
 function save() {
     localStorage.setItem(entitiesStorageKey, JSON.stringify(entities));
-    localStorage.setItem(barriersStorageKey, JSON.stringify(barriers));
+    localStorage.setItem(obstaclesStorageKey, JSON.stringify(obstacles));
     localStorage.setItem(targetStorageKey, JSON.stringify(target));
 }
 
 function clearSimulation() {
     entities = [];
-    barriers = [];
+    obstacles = [];
     target = null;
     init(simulationSizeX, simulationSizeY);
 }
