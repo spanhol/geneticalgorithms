@@ -7,6 +7,9 @@ let simulationSizeX = 800;
 let simulationSizeY = 600;
 
 let simulationFrame = 0;
+let simulationDuration = 300;
+let totalEntities = 100;
+let entitiesPromoteToNextGeneration = totalEntities / 2;
 
 let obstacles = [];
 let entities = [];
@@ -17,6 +20,7 @@ let entitiesStorageKey = "entities";
 let targetStorageKey = "target";
 
 let playing = false;
+let aliveEtities = entities.length;
 let viewRoot = { x: 0, y: 0 };
 
 window.addEventListener('resize', function () {
@@ -24,11 +28,15 @@ window.addEventListener('resize', function () {
 });
 
 function setTableWidth(newWidth) {
-    init(newWidth, null);
+    if (simulationSizeX !== newWidth) {
+        init(newWidth, null);
+    }
 }
 
 function setTableHeight(newHeight) {
-    init(null, newHeight);
+    if (simulationSizeY !== newHeight) {
+        init(null, newHeight);
+    }
 }
 
 function init(newWidth, newHeight) {
@@ -39,12 +47,18 @@ function init(newWidth, newHeight) {
     if (newHeight && newHeight > 0) {
         simulationSizeY = newHeight;
     }
-    target = new Target(simulationSizeX / 2, 50, 40, "#ff0000");
+    target = new Target(simulationSizeX / 2, 50, 40, 40, "#DB5461");
 
-    for (let i = 0; i < 50; i++) {
-        let entity = new Entity(simulationSizeX / 2, simulationSizeY - 20, 20, "#009900", new Dna(100, 0.01));
+    entities = [];
+    for (let i = 0; i < totalEntities; i++) {
+        let entity = new Entity(simulationSizeX / 2, simulationSizeY - 20, 20, target, new Dna(simulationDuration), 0.05, simulationDuration);
         entities.push(entity);
     }
+    obstacles = [];
+    obstacles[0] = new Obstacle(0, simulationSizeY - 2, simulationSizeX, 50, "#FDE74C");
+    obstacles[1] = new Obstacle(0, 0, simulationSizeX, 2, "#FDE74C");
+    obstacles[2] = new Obstacle(simulationSizeX - 2, 0, 2, simulationSizeY, "#FDE74C");
+    obstacles[3] = new Obstacle(0, 0, 2, simulationSizeY, "#FDE74C");
     controls.style = `height: ${controlsHeight}px; width: 100%;`;
 }
 
@@ -59,19 +73,20 @@ function redraw() {
     drawGrid();
     drawTarget();
     drawEntities();
+    drawObstacles();
 }
 
 function drawGrid() {
-    ctx.fillStyle = "#000";
+    ctx.fillStyle = "#06070E";
     ctx.fillRect(viewRoot.x, viewRoot.y, simulationSizeX, simulationSizeY);
 }
 
 function drawTarget() {
     if (target) {
         ctx.fillStyle = target.color;
-        ctx.fillRect(target.x, target.y, target.size, target.size);
+        ctx.fillRect(target.x, target.y, target.width, target.height);
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(target.x + 4, target.y + 4, target.size - 8, target.size - 8);
+        ctx.fillRect(target.x + 4, target.y + 4, target.width - 8, target.height - 8);
     }
 }
 
@@ -114,7 +129,7 @@ canvas.addEventListener('mousedown', function (e) {
     mouseButtonPressed = e.button;
     lastPos.x = e.clientX;
     lastPos.y = e.clientY;
-    if (e.button == 0) {
+    if (e.button === 0) {
 
     }
 });
@@ -129,7 +144,7 @@ canvas.addEventListener('mousemove', function (e) {
     if (!mouseIsPressed) {
         return;
     }
-    if (mouseButtonPressed == 0) {
+    if (mouseButtonPressed === 0) {
         mouseDrawing(e)
     }
 });
@@ -150,13 +165,52 @@ reset();
 
 function step() {
     for (let i = 0; i < entities.length; i++) {
-        console.log(entities[i]);
-        // console.log(entities[i].dna.genes[simulationFrame]);
+        if (!entities[i].alive) {
+            continue;
+        }
+        entities[i].acelerate(simulationFrame);
+        entities[i].move();
+        let collisionOccured = checkCollisions(entities[i]);
+        if (collisionOccured) {
+            entities[i].stop();
+            aliveEtities--;
+        }
     }
 
     simulationFrame++;
     debounce(redraw());
+    if (simulationFrame >= simulationDuration || aliveEtities < 1) {
+        nextGeneration();
+    }
 };
+
+function nextGeneration() {
+    for (let i = 0; i < entities.length; i++) {
+        entities[i].calculateFitness();
+    }
+    entities.sort(({ fitness: a }, { fitness: b }) => b - a);
+    let selectedEntities = entities.slice(0, entitiesPromoteToNextGeneration);
+    selectedEntities[0].color = "#0FFF95";
+    let newEntities = [];
+    for (let i = 0; i < selectedEntities.length; i++) {
+        newEntities.push(selectedEntities[i].mutate());
+    }
+    entities = selectedEntities.concat(newEntities);
+    for (let i = 0; i < entities.length; i++) {
+        entities[i].start();
+    }
+    simulationFrame = 0;
+    aliveEtities = entities.length;
+}
+
+function checkCollisions(entity) {
+    for (let i = 0; i < obstacles.length; i++) {
+        if (obstacles[i].checkCollision(entity)) {
+            return true;
+        }
+    }
+    return target.checkCollision(entity);
+}
 
 function switchButtons() {
     if (playing) {
@@ -170,15 +224,17 @@ function switchButtons() {
 
 async function play() {
     playing = true;
+    aliveEtities = entities.length;
     switchButtons();
     while (playing) {
         await sleep(stepDelay);
-        step()
+        step();
     }
 };
 
 function stop() {
     playing = false;
+    simulationFrame = 0;
     switchButtons();
 }
 

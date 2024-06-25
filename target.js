@@ -2,13 +2,25 @@ class Target {
     /**
      * @param {number} x 
      * @param {number} y
-     * @param {number} size 
+     * @param {number} width 
+     * @param {number} height 
      * @param {string} color
      */
-    constructor(x, y, size, color) {
+    constructor(x, y, width, height, color) {
         this.x = x;
         this.y = y;
-        this.size = size;
+        this.width = width;
+        this.height = height;
         this.color = color;
+    }
+
+    checkCollision(entity) {
+        if ((entity.x > this.x) &&
+            (entity.x < this.x + this.width) &&
+            (entity.y > this.y) &&
+            (entity.y < this.y + this.height)) {
+            return true;
+        }
+        return false;
     }
 }

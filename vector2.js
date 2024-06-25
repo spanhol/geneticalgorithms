@@ -9,15 +9,18 @@ class Vector2 {
     }
 
     add(other) {
-        return new Vector2(this.x + other.x, this.y + other.y);
+        this.x = this.x + other.x;
+        this.y = this.y + other.y;
     }
 
     subtract(other) {
-        return new Vector2(this.x - other.x, this.y - other.y);
+        this.x = this.x - other.x;
+        this.y = this.y - other.y;
     };
 
     multiply(scalar) {
-        return new Vector2(this.x * scalar, this.y * scalar);
+        this.x = this.x * scalar;
+        this.y = this.y * scalar;
     };
 
     magnitude() {
@@ -31,4 +34,8 @@ class Vector2 {
             this.y /= mag;
         }
     };
+
+    distance(other) {
+        return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2))
+    }
 }
