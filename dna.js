@@ -5,7 +5,7 @@ class Dna {
     constructor(size) {
         this.size = size;
         this.genes = [];
-        this.maxSpeed = 4;
+        this.maxSpeed = 8;
         for (let i = 0; i < size; i++) {
             this.genes.push(this.randomVec2(this.maxSpeed));
         }

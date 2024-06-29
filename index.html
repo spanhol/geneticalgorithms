@@ -15,17 +15,26 @@
     <div id="controls">
         <button onclick="play()" type="button" title="Play" class="btn btn-primary margin-top margin-left" id="play"><i
                 class="fa-solid fa-play icon-size-25p"></i></button>
-        <button onclick="stop()" type="button" title="Stop" class="btn btn-primary margin-top margin-left"
-            style="display: none;" id="stop"><i class="fa-solid fa-stop icon-size-25p"></i></button>
-        <button onclick="save()" type="button" title="Save current state" class="btn btn-primary margin-top "
-            id="saveGameState"><i class="fa-solid fa-save icon-size-25p"></i></button>
-        <button onclick="load()" type="button" title="Load saved state" class="btn btn-primary margin-top"
-            id="loadGameState"><i class="fa-solid fa-arrow-up-from-bracket icon-size-25p"></i></button>
+        <button onclick="stop()" type="button" title="Pause" class="btn btn-primary margin-top margin-left"
+            style="display: none;" id="stop"><i class="fa-solid fa-pause icon-size-25p"></i></button>
+
+        <button onclick="bw()" type="button" title="Decrease speed" class="btn btn-primary margin-top margin-left"
+            id="bw"><i class="fa-solid fa-backward icon-size-25p"></i></button>
+        <button onclick="ff()" type="button" title="Increase speed" class="btn btn-primary margin-top margin-right"
+            id="ff"><i class="fa-solid fa-forward icon-size-25p"></i></button>
+
+        <button onclick="selectAdd()" type="button" title="Add Obstacle" class="btn btn-primary margin-top " id="add"><i
+                class="fa-solid fa-plus icon-size-25p"></i></button>
+        <button onclick="selectMinus()" type="button" title="Delete Obstacle"
+            class="btn btn-secondary margin-top margin-right" id="minus"><i
+                class="fa-solid fa-minus icon-size-25p"></i></button>
+
         <button onclick="clearGameState()" type="button" title="Clear" class="btn btn-primary margin-top margin-right"
             id="clearGameState"><i class="fa-solid fa-broom icon-size-25p"></i></button>
         <button onclick="openSettings()" type="button" title="Settings" class="btn btn-primary margin-top margin-right"
             style="float: right;" id="settings"><i class="fa-solid fa-gear icon-size-25p"></i></button>
     </div>
+    <div id="stats"></div>
     <canvas id="canvas" style="border:1px solid #ffffff;">
     </canvas>
 
