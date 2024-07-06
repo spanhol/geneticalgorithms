@@ -5,13 +5,13 @@ class Dna {
     constructor(size) {
         this.size = size;
         this.genes = [];
-        this.maxSpeed = 8;
+        this.maxAcceleration = 3;
         for (let i = 0; i < size; i++) {
-            this.genes.push(this.randomVec2(this.maxSpeed));
+            this.genes.push(this.randomVec2(this.maxAcceleration));
         }
     }
 
-    randomVec2(maxSpeed) {
-        return new Vector2((Math.random() * maxSpeed) - (maxSpeed / 2), (Math.random() * maxSpeed) - (maxSpeed / 2));
+    randomVec2(maxAcceleration) {
+        return new Vector2((Math.random() * maxAcceleration) - (maxAcceleration / 2), (Math.random() * maxAcceleration) - (maxAcceleration / 2));
     }
 }

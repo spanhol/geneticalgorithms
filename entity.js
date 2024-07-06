@@ -8,7 +8,7 @@ class Entity {
      * @param {number} mutationRate
      * @property {Vector2} velocity
      */
-    constructor(initialX, initialy, size, target, dna, mutationRate, simulationDuration) {
+    constructor(initialX, initialy, target, dna, mutationRate, simulationDuration, size = 15) {
         this.fitness = 0;
         this.lastSimulationFrame = 0;
         this.color = "#3AAFB9";
@@ -23,6 +23,7 @@ class Entity {
         this.dna = dna;
         this.mutationRate = mutationRate;
         this.size = size;
+        this.maxSpeed = 10;
         let v = new Vector2(this.initialX, this.initialy);
         this.initialDistanceToTarget = v.distance(target);
     }
@@ -35,21 +36,13 @@ class Entity {
         let lastPosition = new Vector2(this.x, this.y);
         let distance = this.initialDistanceToTarget - lastPosition.distance(target);
         this.fitness += distance;
-        // console.log("alive: " + this.alive + " distance: " + distance)
         if (target.checkCollision(this)) {
             this.fitness += this.initialDistanceToTarget * 10;
-            this.fitness -= this.lastSimulationFrame * 10;
-            // console.log("On Target: " + ((this.initialDistanceToTarget * 10) - (this.lastSimulationFrame * 10)));
-            // console.log(this.initialDistanceToTarget);
-            // console.log(this.lastSimulationFrame);
+            this.fitness -= this.lastSimulationFrame * 2;
         } else {
-            this.fitness += this.lastSimulationFrame * 5;
+            this.fitness += this.lastSimulationFrame;
             this.fitness -= this.simulationDuration;
-            // console.log("OFF Target: " + (this.lastSimulationFrame - this.simulationDuration));
         }
-
-        // console.log("FIT: " + this.fitness);
-        // console.log("\n");
     }
 
     start() {
@@ -62,12 +55,11 @@ class Entity {
     mutate() {
         let newDna = structuredClone(this.dna);
         let geneChanges = Math.floor(Math.random() * newDna.genes.length * this.mutationRate) + 1;
-        geneChanges = 1;
         for (let i = 0; i < geneChanges; i++) {
             let geneToChange = Math.floor(Math.random() * newDna.genes.length);
-            newDna.genes[geneToChange] = Dna.prototype.randomVec2(newDna.maxSpeed);
+            newDna.genes[geneToChange] = Dna.prototype.randomVec2(newDna.maxAcceleration);
         }
-        let newEntity = new Entity(this.initialX, this.initialy, this.size, this.target, newDna, this.mutationRate, this.simulationDuration);
+        let newEntity = new Entity(this.initialX, this.initialy, this.target, newDna, this.mutationRate, this.simulationDuration);
         this.fitness = 0;
         return newEntity;
     }
@@ -79,6 +71,8 @@ class Entity {
     acelerate(simulationFrame) {
         if (this.alive) {
             this.velocity.add(this.dna.genes[simulationFrame]);
+            this.velocity.x = Math.min(this.velocity.x, this.maxSpeed);
+            this.velocity.y = Math.min(this.velocity.y, this.maxSpeed);
             this.lastSimulationFrame = simulationFrame;
         }
     }
