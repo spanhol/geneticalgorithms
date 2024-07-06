@@ -7,9 +7,9 @@ let simulationSizeX = 800;
 let simulationSizeY = 600;
 
 let simulationFrame = 0;
-let simulationDuration = 500;
+let simulationDuration = 2000;
 let totalEntities = 200;
-let newEntitiesFromSelection = 4
+let newEntitiesFromSelection = 19
 let entitiesPromotedToNextGeneration = totalEntities / (newEntitiesFromSelection + 1);
 
 let bestFitness = 0;
@@ -28,6 +28,12 @@ let playing = false;
 let aliveEtities = entities.length;
 let viewRoot = { x: 0, y: 0 };
 
+let mutationRate = 0.01;
+
+
+settings.needsReset = true;
+reset();
+
 window.addEventListener('resize', function () {
     debounce(redraw());
 });
@@ -45,31 +51,32 @@ function setTableHeight(newHeight) {
 }
 
 function init(newWidth, newHeight) {
-    settings.needsReset = false;
     if (newWidth && newWidth > 0) {
         simulationSizeX = newWidth;
     }
     if (newHeight && newHeight > 0) {
         simulationSizeY = newHeight;
     }
-    target = new Target(simulationSizeX / 2, 50, 40, 40, "#DB5461");
+    resetBorderObstacles();
+    resetTarget();
+    resetEntitiesOrigin();
+    if (settings.needsReset) {
+        bestFitness = 0;
+        bestTime = 0;
+        generation = 1;
+        entities = [];
+        for (let i = 0; i < totalEntities; i++) {
+            let entity = new Entity(simulationSizeX / 2, simulationSizeY - 20, target, new Dna(simulationDuration), mutationRate, simulationDuration);
+            entities.push(entity);
+        }
 
-    bestFitness = 0;
-    bestTime = 0;
-    generation = 1;
+        aliveEtities = entities.length;
 
-    entities = [];
-    for (let i = 0; i < totalEntities; i++) {
-        let entity = new Entity(simulationSizeX / 2, simulationSizeY - 20, 15, target, new Dna(simulationDuration), 0.05, simulationDuration);
-        entities.push(entity);
+        resetObstacles();
+        loadDefaultPreset();
     }
-    aliveEtities = entities.length;
-    obstacles = [];
-    obstacles[0] = new Obstacle(0, simulationSizeY - 2, simulationSizeX, 50, "#FDE74C");
-    obstacles[1] = new Obstacle(0, 0, simulationSizeX, 2, "#FDE74C");
-    obstacles[2] = new Obstacle(simulationSizeX - 2, 0, 2, simulationSizeY, "#FDE74C");
-    obstacles[3] = new Obstacle(0, 0, 2, simulationSizeY, "#FDE74C");
-    controls.style = `height: ${controlsHeight}px; width: 100%;`;
+    controls.style = `height: ${controlsHeight}px; width: 100%; min-width: 650px;`;
+    settings.needsReset = false;
 }
 
 function updateStatBlock() {
@@ -258,8 +265,6 @@ function calcCurrentObstacle() {
     return new Obstacle(xStart, yStart, xEnd - xStart, yEnd - yStart);
 }
 
-reset();
-
 function step() {
     for (let i = 0; i < entities.length; i++) {
         if (!entities[i].alive) {
@@ -287,7 +292,8 @@ function nextGeneration() {
     }
     entities.sort(({ fitness: a }, { fitness: b }) => b - a);
     let selectedEntities = entities.slice(0, entitiesPromotedToNextGeneration);
-    selectedEntities[0].color = "#0FFF95";
+    selectedEntities[0].color = "#00ff00";
+    selectedEntities[0].size = 25;
     bestFitness = selectedEntities[0].fitness;
     bestTime = selectedEntities[0].lastSimulationFrame;
     let newEntities = [];
@@ -356,10 +362,64 @@ async function sleep(ms) {
 }
 
 function clearGameState() {
-    entities = [];
-    obstacles = [];
-    target = null;
     init(simulationSizeX, simulationSizeY);
+    redraw();
+}
+
+function resetBorderObstacles() {
+    obstacles[0] = new Obstacle(0, simulationSizeY - 2, simulationSizeX, 50, "#FDE74C");
+    obstacles[1] = new Obstacle(0, 0, simulationSizeX, 2, "#FDE74C");
+    obstacles[2] = new Obstacle(simulationSizeX - 2, 0, 2, simulationSizeY, "#FDE74C");
+    obstacles[3] = new Obstacle(0, 0, 2, simulationSizeY, "#FDE74C");
+}
+
+function resetObstacles() {
+    obstacles = [];
+    resetBorderObstacles();
+    resetTarget();
+    resetEntitiesOrigin();
+}
+
+function resetTarget() {
+    target = new Target(simulationSizeX / 2, 50, 40, 40, "#DB5461");
+}
+
+function resetEntitiesOrigin() {
+    for (let i = 0; i < entities.length; i++) {
+        if (!playing) {
+            entities[i].x = simulationSizeX / 2;
+            entities[i].y = simulationSizeY - 20;
+        }
+        entities[i].initialX = simulationSizeX / 2;
+        entities[i].initialy = simulationSizeY - 20;
+        entities[i].target = target;
+    }
+}
+
+// function loadDefaultPreset() {
+//     obstacles[4] = new Obstacle(0, simulationSizeY / 3, simulationSizeX / 1.3, 50, "#FDE74C")
+//     obstacles[5] = new Obstacle(simulationSizeX / 3, simulationSizeY / 1.1, 10000, 50, "#FDE74C")
+// }
+
+function loadDefaultPreset() {
+}
+
+function loadPreset1() {
+    resetObstacles();
+    for (let x = 0; x < 5001; x += 50) {
+        for (let y = 200; y <= simulationSizeY * 0.8; y += 50) {
+            if (Math.random() < 0.6) {
+                let variance = (Math.random() * 40) - 20;
+                obstacles.push(new Obstacle(x + variance, y + variance, 20, 20, "#FDE74C"));
+            }
+        }
+    }
+    redraw();
+}
+
+function loadPreset2() {
+    resetObstacles();
+    obstacles.push(new Obstacle(0, simulationSizeY - 2, simulationSizeX, 50, "#FDE74C"));
     redraw();
 }
 

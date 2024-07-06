@@ -8,7 +8,7 @@
     <script src="js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/ui.css">
-    <title>Game of Life</title>
+    <title>Genetic Algorithms</title>
 </head>
 
 <body style="background-color: #111818; margin: 0; padding: 0;">
@@ -31,11 +31,16 @@
 
         <button onclick="clearGameState()" type="button" title="Clear" class="btn btn-primary margin-top margin-right"
             id="clearGameState"><i class="fa-solid fa-broom icon-size-25p"></i></button>
+
+        <button onclick="loadPreset1()" type="button" title="preset" class="btn btn-primary margin-top"
+            id="clearGameState">Preset 1</button>
+        <button onclick="loadPreset2()" type="button" title="preset" class="btn btn-primary margin-top"
+            id="clearGameState">Preset 2</button>
         <button onclick="openSettings()" type="button" title="Settings" class="btn btn-primary margin-top margin-right"
             style="float: right;" id="settings"><i class="fa-solid fa-gear icon-size-25p"></i></button>
     </div>
     <div id="stats"></div>
-    <canvas id="canvas" style="border:1px solid #ffffff;">
+    <canvas id="canvas" style="border:1px solid #ffffff; min-width: 650px;">
     </canvas>
 
     <a style="color: white;" href="https://github.com/spanhol/geneticalgorithm" target="_blank">

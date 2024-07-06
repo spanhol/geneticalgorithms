@@ -18,8 +18,8 @@ const settings = { needsReset: true }
 
 
 const controlsHeight = 60;
-fpsElement.value = 30;
-let stepDelay = 30;
+fpsElement.value = 60;
+let stepDelay = 60;
 
 
 const statBlock = {
@@ -99,7 +99,11 @@ function updateStepDelay() {
 
 function resize() {
     let canvas = document.getElementById("canvas");
-    canvas.width = window.innerWidth - 10;
+    if (window.innerWidth - 10 >= 650) {
+        canvas.width = window.innerWidth - 10;
+    } else {
+        canvas.width = 650
+    }
     canvas.height = window.innerHeight - 10 - controlsHeight;
     gridX.value = canvas.width;
     gridY.value = canvas.height;
@@ -110,11 +114,6 @@ function resize() {
 fpsElement.addEventListener("change", function () {
     updateStepDelay();
 }, false);
-
-function clearSimulationState() {
-    clearSimulation();
-    redraw();
-}
 
 async function debounce(func, timeout = 300) {
     let timer = undefined;
