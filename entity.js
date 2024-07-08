@@ -11,7 +11,8 @@ class Entity {
     constructor(initialX, initialy, target, dna, mutationRate, simulationDuration, size = 15) {
         this.fitness = 0;
         this.lastSimulationFrame = 0;
-        this.color = "#3AAFB9";
+        this.color = "#34d6FF";
+        this.fillColor = "#0496FF";
         this.alive = true;
         this.x = initialX;
         this.y = initialy;
@@ -24,6 +25,7 @@ class Entity {
         this.mutationRate = mutationRate;
         this.size = size;
         this.maxSpeed = 10;
+        this.best = false;
         let v = new Vector2(this.initialX, this.initialy);
         this.initialDistanceToTarget = v.distance(target);
     }

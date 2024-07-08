@@ -28,11 +28,18 @@ class Vector2 {
     };
 
     normalize() {
+        let x = this.x;
+        let y = this.y;
         const mag = this.magnitude();
         if (mag > 0) {
-            this.x /= mag;
-            this.y /= mag;
+            x = x / mag;
+            y = y / mag;
         }
+        if (mag == 0) {
+            x = 0;
+            y = 1;
+        }
+        return new Vector2(x, y);
     };
 
     distance(other) {

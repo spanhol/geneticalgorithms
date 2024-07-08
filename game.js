@@ -31,6 +31,12 @@ let viewRoot = { x: 0, y: 0 };
 let mutationRate = 0.01;
 let currentPreset = "default";
 
+let targetColor = "#7CE3FF";
+let obstacleColor = "#ff715b";
+let obstacleFillColor = "#FFFFFF";
+let entityColor = "#052f5f";
+let bestEntityColor = "#052f5f";
+
 settings.needsReset = true;
 reset();
 
@@ -114,7 +120,7 @@ function redraw() {
 }
 
 function drawGrid() {
-    ctx.fillStyle = "#06070E";
+    ctx.fillStyle = "#404e4d";
     ctx.fillRect(viewRoot.x, viewRoot.y, simulationSizeX, simulationSizeY);
 }
 
@@ -123,18 +129,24 @@ function drawTarget() {
         ctx.fillStyle = target.color;
         ctx.fillRect(target.x, target.y, target.width, target.height);
         ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(target.x + 4, target.y + 4, target.width - 8, target.height - 8);
+        ctx.fillRect(target.x + 8, target.y + 8, target.width - 16, target.height - 16);
     }
 }
 
 function drawObstacles() {
     for (let i = 0; i < obstacles.length; i++) {
-        if (obstacles[i].x < 0 || obstacles[i].x > canvas.width
-            || obstacles[i].y < 0 || obstacles[i].y > canvas.height) {
+        if (obstacles[i].x + obstacles[i].width < 0 || obstacles[i].x > canvas.width
+            || obstacles[i].y + obstacles[i].height < 0 || obstacles[i].y > canvas.height) {
             continue;
         }
         ctx.fillStyle = obstacles[i].color;
         ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+        if (obstacles[i].width > 16 && obstacles[i].height > 16) {
+            ctx.fillStyle = "#FF8C42";
+            ctx.fillRect(obstacles[i].x + 4, obstacles[i].y + 4, obstacles[i].width - 8, obstacles[i].height - 8);
+            ctx.fillStyle = obstacleFillColor;
+            ctx.fillRect(obstacles[i].x + 8, obstacles[i].y + 8, obstacles[i].width - 16, obstacles[i].height - 16);
+        }
     }
 }
 
@@ -155,13 +167,80 @@ function drawEntities() {
         }
         ctx.fillStyle = entities[i].color;
         let path = new Path2D();
-        path.moveTo((entities[i].x) + entities[i].size / 3, entities[i].y);
-        path.lineTo((entities[i].x), entities[i].y - entities[i].size);
-        path.lineTo((entities[i].x) - entities[i].size / 3, entities[i].y);
-        ctx.fill(path);
+
+        if (currentPreset === "preset1") {
+            path.moveTo((entities[i].x) + (entities[i].size + 2) / 3, entities[i].y);
+            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2));
+            path.lineTo((entities[i].x) - (entities[i].size + 2) / 3, entities[i].y);
+            ctx.fill(path);
+
+            ctx.fillStyle = entities[i].fillColor;
+            let fillPath = new Path2D();
+            fillPath.moveTo((entities[i].x) + entities[i].size / 3, entities[i].y);
+            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size);
+            fillPath.lineTo((entities[i].x) - entities[i].size / 3, entities[i].y);
+            ctx.fill(fillPath);
+
+            ctx.fillStyle = "#FFF";
+            ctx.fillRect(entities[i].x, entities[i].y, 1, 1);
+        } else if (currentPreset === "default" || currentPreset === "preset2") {
+            ctx.fillStyle = entities[i].color;
+            let path = new Path2D();
+            path.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
+            path.lineTo((entities[i].x) + (entities[i].size + 2), entities[i].y);
+            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2) / 3);
+            ctx.fill(path);
+
+            ctx.fillStyle = entities[i].fillColor;
+            let fillPath = new Path2D();
+            fillPath.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
+            fillPath.lineTo((entities[i].x) + entities[i].size, entities[i].y);
+            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size / 3);
+            ctx.fill(fillPath);
+        }
+    }
+
+    for (let i = 0; i < entities.length; i++) {
+        if (!entities[i].best) {
+            continue;
+        }
+        if (entities[i].x < 0 || entities[i].x > canvas.width
+            || entities[i].y < 0 || entities[i].y > canvas.height) {
+            continue;
+        }
+
+        if (currentPreset === "preset1") {
+            ctx.fillStyle = entities[i].color;
+            let path = new Path2D();
+            path.moveTo((entities[i].x) + (entities[i].size + 2) / 3, entities[i].y);
+            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2));
+            path.lineTo((entities[i].x) - (entities[i].size + 2) / 3, entities[i].y);
+            ctx.fill(path);
+
+            ctx.fillStyle = entities[i].fillColor;
+            let fillPath = new Path2D();
+            fillPath.moveTo((entities[i].x) + entities[i].size / 3, entities[i].y);
+            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size);
+            fillPath.lineTo((entities[i].x) - entities[i].size / 3, entities[i].y);
+            ctx.fill(fillPath);
+
+        } else if (currentPreset === "default" || currentPreset === "preset2") {
+            ctx.fillStyle = entities[i].color;
+            let path = new Path2D();
+            path.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
+            path.lineTo((entities[i].x) + (entities[i].size + 2), entities[i].y);
+            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2) / 3);
+            ctx.fill(path);
+
+            ctx.fillStyle = entities[i].fillColor;
+            let fillPath = new Path2D();
+            fillPath.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
+            fillPath.lineTo((entities[i].x) + entities[i].size, entities[i].y);
+            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size / 3);
+            ctx.fill(fillPath);
+        }
     }
 }
-
 
 let lastI = -1;
 let lastJ = -1;
@@ -169,7 +248,6 @@ let initialPos = { x: null, y: null };
 let lastPos = { x: null, y: null };
 let mouseIsPressed = false;
 let mouseButtonPressed = 0;
-
 
 canvas.addEventListener('touchstart', function (e) {
     mouseDown(e);
@@ -187,13 +265,6 @@ function mouseDown(e) {
     initialPos.y = e.clientY;
     lastPos.x = e.clientX;
     lastPos.y = e.clientY;
-    if (e.button === 0) {
-        if (addObstacleSelected) {
-
-        } else {
-
-        }
-    }
 }
 
 canvas.addEventListener('mouseup', function (e) {
@@ -299,8 +370,10 @@ function nextGeneration() {
     }
     entities.sort(({ fitness: a }, { fitness: b }) => b - a);
     let selectedEntities = entities.slice(0, entitiesPromotedToNextGeneration);
-    selectedEntities[0].color = "#00ff00";
+    selectedEntities[0].fillColor = "#00ff00";
+    selectedEntities[0].color = "#FFFFFF";
     selectedEntities[0].size = 25;
+    selectedEntities[0].best = true;
     bestFitness = selectedEntities[0].fitness;
     bestTime = selectedEntities[0].lastSimulationFrame;
     let newEntities = [];
@@ -337,8 +410,6 @@ function switchButtons() {
     }
 }
 
-
-
 async function play() {
     playing = true;
     switchButtons();
@@ -369,15 +440,17 @@ async function sleep(ms) {
 }
 
 function clearGameState() {
-    init(simulationSizeX, simulationSizeY);
+    obstacles = [];
+    resetSim();
+    resetBorderObstacles();
     redraw();
 }
 
 function resetBorderObstacles() {
-    obstacles[0] = new Obstacle(0, simulationSizeY - 2, simulationSizeX, 50, "#FDE74C");
-    obstacles[1] = new Obstacle(0, 0, simulationSizeX, 2, "#FDE74C");
-    obstacles[2] = new Obstacle(simulationSizeX - 2, 0, 2, simulationSizeY, "#FDE74C");
-    obstacles[3] = new Obstacle(0, 0, 2, simulationSizeY, "#FDE74C");
+    obstacles[0] = new Obstacle(0, simulationSizeY - 4, simulationSizeX, 4, obstacleColor);
+    obstacles[1] = new Obstacle(0, 0, simulationSizeX, 4, obstacleColor);
+    obstacles[2] = new Obstacle(simulationSizeX - 4, 0, 4, simulationSizeY, obstacleColor);
+    obstacles[3] = new Obstacle(0, 0, 4, simulationSizeY, obstacleColor);
 }
 
 function resetObstacles() {
@@ -389,9 +462,9 @@ function resetObstacles() {
 
 function resetTarget() {
     if (currentPreset === "preset1") {
-        target = new Target(simulationSizeX / 2, 50, 40, 40, "#DB5461");
+        target = new Target(simulationSizeX / 2, 50, 40, 40, targetColor);
     } else if (currentPreset === "default" || currentPreset === "preset2") {
-        target = new Target(simulationSizeX - 50, simulationSizeY / 2, 40, 40, "#DB5461");
+        target = new Target(simulationSizeX - 50, simulationSizeY / 2, 40, 40, targetColor);
     }
 }
 
@@ -424,8 +497,8 @@ function loadDefaultPreset() {
     resetSim();
     resetObstacles();
     let obsHeight = simulationSizeY * 0.6;
-    obstacles.push(new Obstacle(500, 0, 50, obsHeight, "#FDE74C"));
-    obstacles.push(new Obstacle(1000, simulationSizeY * 0.4, 50, obsHeight, "#FDE74C"));
+    obstacles.push(new Obstacle(500, -8, 50, obsHeight, obstacleColor));
+    obstacles.push(new Obstacle(1000, simulationSizeY * 0.4, 50, obsHeight + 8, obstacleColor));
     redraw();
 }
 
@@ -437,7 +510,7 @@ function loadPreset1() {
         for (let y = 200; y <= simulationSizeY * 0.8; y += 50) {
             if (Math.random() < 0.6) {
                 let variance = (Math.random() * 40) - 20;
-                obstacles.push(new Obstacle(x + variance, y + variance, 20, 20, "#FDE74C"));
+                obstacles.push(new Obstacle(x + variance, y + variance, 20, 20, obstacleColor));
             }
         }
     }
@@ -449,10 +522,10 @@ function loadPreset2() {
     resetSim();
     resetObstacles();
     let obsHeight = simulationSizeY * 0.6;
-    obstacles.push(new Obstacle(500, 0, 50, obsHeight, "#FDE74C"));
-    obstacles.push(new Obstacle(1000, simulationSizeY * 0.4, 50, obsHeight, "#FDE74C"));
+    obstacles.push(new Obstacle(500, -8, 50, obsHeight, obstacleColor));
+    obstacles.push(new Obstacle(1000, simulationSizeY * 0.4, 50, obsHeight + 8, obstacleColor));
     if (simulationSizeX > 1650) {
-        obstacles.push(new Obstacle(1500, 0, 50, obsHeight, "#FDE74C"));
+        obstacles.push(new Obstacle(1500, -8, 50, obsHeight + 8, obstacleColor));
     }
     redraw();
 }

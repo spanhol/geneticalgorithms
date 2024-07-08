@@ -6,7 +6,7 @@ class Obstacle {
      * @param {number} height
      * @param {string} color
      */
-    constructor(x, y, width, height, color = "#FDE74C") {
+    constructor(x, y, width, height, color = "#ff715b") {
         this.x = x;
         this.y = y;
         this.width = width;
