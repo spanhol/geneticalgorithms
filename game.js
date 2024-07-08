@@ -29,7 +29,7 @@ let aliveEtities = entities.length;
 let viewRoot = { x: 0, y: 0 };
 
 let mutationRate = 0.01;
-
+let currentPreset = "default";
 
 settings.needsReset = true;
 reset();
@@ -61,22 +61,27 @@ function init(newWidth, newHeight) {
     resetTarget();
     resetEntitiesOrigin();
     if (settings.needsReset) {
-        bestFitness = 0;
-        bestTime = 0;
-        generation = 1;
-        entities = [];
-        for (let i = 0; i < totalEntities; i++) {
-            let entity = new Entity(simulationSizeX / 2, simulationSizeY - 20, target, new Dna(simulationDuration), mutationRate, simulationDuration);
-            entities.push(entity);
-        }
-
-        aliveEtities = entities.length;
-
-        resetObstacles();
-        loadDefaultPreset();
+        resetSim();
     }
+    loadDefaultPreset();
     controls.style = `height: ${controlsHeight}px; width: 100%; min-width: 650px;`;
     settings.needsReset = false;
+}
+
+function resetSim() {
+    stop();
+    bestFitness = 0;
+    bestTime = 0;
+    generation = 1;
+    entities = [];
+    for (let i = 0; i < totalEntities; i++) {
+        let entity = new Entity(simulationSizeX / 2, simulationSizeY - 20, target, new Dna(simulationDuration), mutationRate, simulationDuration);
+        entities.push(entity);
+    }
+
+    aliveEtities = entities.length;
+
+    resetObstacles();
 }
 
 function updateStatBlock() {
@@ -202,7 +207,9 @@ canvas.addEventListener('touchend', function (e) {
 
 function mouseUp(e) {
     if (mouseIsPressed && addObstacleSelected) {
-        obstacles.push(calcCurrentObstacle());
+        let o = calcCurrentObstacle();
+        console.log(o)
+        obstacles.push(o);
     }
     if (mouseIsPressed && !addObstacleSelected) {
         let obstaclesToRemove = []
@@ -381,30 +388,50 @@ function resetObstacles() {
 }
 
 function resetTarget() {
-    target = new Target(simulationSizeX / 2, 50, 40, 40, "#DB5461");
-}
-
-function resetEntitiesOrigin() {
-    for (let i = 0; i < entities.length; i++) {
-        if (!playing) {
-            entities[i].x = simulationSizeX / 2;
-            entities[i].y = simulationSizeY - 20;
-        }
-        entities[i].initialX = simulationSizeX / 2;
-        entities[i].initialy = simulationSizeY - 20;
-        entities[i].target = target;
+    if (currentPreset === "preset1") {
+        target = new Target(simulationSizeX / 2, 50, 40, 40, "#DB5461");
+    } else if (currentPreset === "default" || currentPreset === "preset2") {
+        target = new Target(simulationSizeX - 50, simulationSizeY / 2, 40, 40, "#DB5461");
     }
 }
 
-// function loadDefaultPreset() {
-//     obstacles[4] = new Obstacle(0, simulationSizeY / 3, simulationSizeX / 1.3, 50, "#FDE74C")
-//     obstacles[5] = new Obstacle(simulationSizeX / 3, simulationSizeY / 1.1, 10000, 50, "#FDE74C")
-// }
+function resetEntitiesOrigin() {
+    if (currentPreset === "preset1") {
+        for (let i = 0; i < entities.length; i++) {
+            if (!playing) {
+                entities[i].x = simulationSizeX / 2;
+                entities[i].y = simulationSizeY - 20;
+            }
+            entities[i].initialX = simulationSizeX / 2;
+            entities[i].initialy = simulationSizeY - 20;
+            entities[i].target = target;
+        }
+    } else if (currentPreset === "default" || currentPreset === "preset2") {
+        for (let i = 0; i < entities.length; i++) {
+            if (!playing) {
+                entities[i].x = 100;
+                entities[i].y = simulationSizeY / 2;
+            }
+            entities[i].initialX = 100;
+            entities[i].initialy = simulationSizeY / 2;
+            entities[i].target = target;
+        }
+    }
+}
 
 function loadDefaultPreset() {
+    currentPreset = "default";
+    resetSim();
+    resetObstacles();
+    let obsHeight = simulationSizeY * 0.6;
+    obstacles.push(new Obstacle(500, 0, 50, obsHeight, "#FDE74C"));
+    obstacles.push(new Obstacle(1000, simulationSizeY * 0.4, 50, obsHeight, "#FDE74C"));
+    redraw();
 }
 
 function loadPreset1() {
+    currentPreset = "preset1";
+    resetSim();
     resetObstacles();
     for (let x = 0; x < 5001; x += 50) {
         for (let y = 200; y <= simulationSizeY * 0.8; y += 50) {
@@ -418,8 +445,15 @@ function loadPreset1() {
 }
 
 function loadPreset2() {
+    currentPreset = "preset2";
+    resetSim();
     resetObstacles();
-    obstacles.push(new Obstacle(0, simulationSizeY - 2, simulationSizeX, 50, "#FDE74C"));
+    let obsHeight = simulationSizeY * 0.6;
+    obstacles.push(new Obstacle(500, 0, 50, obsHeight, "#FDE74C"));
+    obstacles.push(new Obstacle(1000, simulationSizeY * 0.4, 50, obsHeight, "#FDE74C"));
+    if (simulationSizeX > 1650) {
+        obstacles.push(new Obstacle(1500, 0, 50, obsHeight, "#FDE74C"));
+    }
     redraw();
 }
 
