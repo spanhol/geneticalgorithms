@@ -1,3 +1,6 @@
+# Live Version
+https://geneticalgorithms.vercel.app/
+
 # Web-based Genetic Algorithm Pathfinding Simulation
 
 Genetic algorithms (GAs) are powerful optimization techniques inspired by natural selection. They excel at finding solutions to complex problems where traditional methods struggle.
