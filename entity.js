@@ -8,7 +8,7 @@ class Entity {
      * @param {number} mutationRate
      * @property {Vector2} velocity
      */
-    constructor(initialX, initialy, target, dna, mutationRate, simulationDuration, size = 15) {
+    constructor(initialX, initialy, target, dna, mutationRate, simulationDuration, size = 9) {
         this.fitness = 0;
         this.lastSimulationFrame = 0;
         this.color = "#34d6FF";
@@ -18,7 +18,7 @@ class Entity {
         this.y = initialy;
         this.initialX = initialX;
         this.initialy = initialy;
-        this.velocity = new Vector2(0, 0);
+        this.velocity = new Vector2(1, 0);
         this.simulationDuration = simulationDuration;
         this.target = target;
         this.dna = dna;

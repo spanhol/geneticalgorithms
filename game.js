@@ -95,7 +95,7 @@ function updateStatBlock() {
     statBlock.bestFitness = bestFitness;
     statBlock.bestTime = bestTime;
     statBlock.generation = generation;
-    statBlock.speed = `${fpsElement.value}/s`;
+    statBlock.speed = `${fpsElement.value} fps`;
 
     statsFrame.innerText = "Frame: " + statBlock.frame;
     statsBestTime.innerText = "Best time: " + statBlock.bestTime;
@@ -159,45 +159,33 @@ function drawTempObstacle(obstacle) {
     ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 }
 
+function drawTriangle(posX, posY, radius, rotate) {
+    ctx.beginPath();
+    var a = ((Math.PI * 2) / 3);
+
+    ctx.lineTo(posX + (radius * 2) * Math.cos(a * 0 + rotate), posY + (radius * 2) * Math.sin(a * 0 + rotate));
+    ctx.lineTo(posX + radius * Math.cos(a * 1 + rotate), posY + radius * Math.sin(a * 1 + rotate));
+    ctx.lineTo(posX + radius * Math.cos(a * 2 + rotate), posY + radius * Math.sin(a * 2 + rotate));
+
+    ctx.closePath();
+    ctx.fill();
+
+    return true;
+}
+
 function drawEntities() {
     for (let i = 0; i < entities.length; i++) {
         if (entities[i].x < 0 || entities[i].x > canvas.width
             || entities[i].y < 0 || entities[i].y > canvas.height) {
             continue;
         }
+
+        let radians = Math.atan2(entities[i].velocity.y, entities[i].velocity.x)
+
         ctx.fillStyle = entities[i].color;
-        let path = new Path2D();
-
-        if (currentPreset === "preset1") {
-            path.moveTo((entities[i].x) + (entities[i].size + 2) / 3, entities[i].y);
-            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2));
-            path.lineTo((entities[i].x) - (entities[i].size + 2) / 3, entities[i].y);
-            ctx.fill(path);
-
-            ctx.fillStyle = entities[i].fillColor;
-            let fillPath = new Path2D();
-            fillPath.moveTo((entities[i].x) + entities[i].size / 3, entities[i].y);
-            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size);
-            fillPath.lineTo((entities[i].x) - entities[i].size / 3, entities[i].y);
-            ctx.fill(fillPath);
-
-            ctx.fillStyle = "#FFF";
-            ctx.fillRect(entities[i].x, entities[i].y, 1, 1);
-        } else if (currentPreset === "default" || currentPreset === "preset2") {
-            ctx.fillStyle = entities[i].color;
-            let path = new Path2D();
-            path.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
-            path.lineTo((entities[i].x) + (entities[i].size + 2), entities[i].y);
-            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2) / 3);
-            ctx.fill(path);
-
-            ctx.fillStyle = entities[i].fillColor;
-            let fillPath = new Path2D();
-            fillPath.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
-            fillPath.lineTo((entities[i].x) + entities[i].size, entities[i].y);
-            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size / 3);
-            ctx.fill(fillPath);
-        }
+        drawTriangle(entities[i].x, entities[i].y, entities[i].size + 2, radians);
+        ctx.fillStyle = entities[i].fillColor;
+        drawTriangle(entities[i].x, entities[i].y, entities[i].size, radians);
     }
 
     for (let i = 0; i < entities.length; i++) {
@@ -208,37 +196,12 @@ function drawEntities() {
             || entities[i].y < 0 || entities[i].y > canvas.height) {
             continue;
         }
+        let radians = Math.atan2(entities[i].velocity.y, entities[i].velocity.x)
 
-        if (currentPreset === "preset1") {
-            ctx.fillStyle = entities[i].color;
-            let path = new Path2D();
-            path.moveTo((entities[i].x) + (entities[i].size + 2) / 3, entities[i].y);
-            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2));
-            path.lineTo((entities[i].x) - (entities[i].size + 2) / 3, entities[i].y);
-            ctx.fill(path);
-
-            ctx.fillStyle = entities[i].fillColor;
-            let fillPath = new Path2D();
-            fillPath.moveTo((entities[i].x) + entities[i].size / 3, entities[i].y);
-            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size);
-            fillPath.lineTo((entities[i].x) - entities[i].size / 3, entities[i].y);
-            ctx.fill(fillPath);
-
-        } else if (currentPreset === "default" || currentPreset === "preset2") {
-            ctx.fillStyle = entities[i].color;
-            let path = new Path2D();
-            path.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
-            path.lineTo((entities[i].x) + (entities[i].size + 2), entities[i].y);
-            path.lineTo((entities[i].x), entities[i].y - (entities[i].size + 2) / 3);
-            ctx.fill(path);
-
-            ctx.fillStyle = entities[i].fillColor;
-            let fillPath = new Path2D();
-            fillPath.moveTo((entities[i].x), entities[i].y + entities[i].size / 3);
-            fillPath.lineTo((entities[i].x) + entities[i].size, entities[i].y);
-            fillPath.lineTo((entities[i].x), entities[i].y - entities[i].size / 3);
-            ctx.fill(fillPath);
-        }
+        ctx.fillStyle = entities[i].color;
+        drawTriangle(entities[i].x, entities[i].y, entities[i].size + 2, radians);
+        ctx.fillStyle = entities[i].fillColor;
+        drawTriangle(entities[i].x, entities[i].y, entities[i].size, radians);
     }
 }
 
@@ -372,7 +335,7 @@ function nextGeneration() {
     let selectedEntities = entities.slice(0, entitiesPromotedToNextGeneration);
     selectedEntities[0].fillColor = "#00ff00";
     selectedEntities[0].color = "#FFFFFF";
-    selectedEntities[0].size = 25;
+    selectedEntities[0].size = 12;
     selectedEntities[0].best = true;
     bestFitness = selectedEntities[0].fitness;
     bestTime = selectedEntities[0].lastSimulationFrame;
@@ -461,53 +424,31 @@ function resetObstacles() {
 }
 
 function resetTarget() {
-    if (currentPreset === "preset1") {
-        target = new Target(simulationSizeX / 2, 50, 40, 40, targetColor);
-    } else if (currentPreset === "default" || currentPreset === "preset2") {
-        target = new Target(simulationSizeX - 50, simulationSizeY / 2, 40, 40, targetColor);
-    }
+    target = new Target(simulationSizeX - 50, simulationSizeY / 2, 40, 40, targetColor);
 }
 
 function resetEntitiesOrigin() {
-    if (currentPreset === "preset1") {
-        for (let i = 0; i < entities.length; i++) {
-            if (!playing) {
-                entities[i].x = simulationSizeX / 2;
-                entities[i].y = simulationSizeY - 20;
-            }
-            entities[i].initialX = simulationSizeX / 2;
-            entities[i].initialy = simulationSizeY - 20;
-            entities[i].target = target;
+    for (let i = 0; i < entities.length; i++) {
+        if (!playing) {
+            entities[i].x = 100;
+            entities[i].y = simulationSizeY / 2;
         }
-    } else if (currentPreset === "default" || currentPreset === "preset2") {
-        for (let i = 0; i < entities.length; i++) {
-            if (!playing) {
-                entities[i].x = 100;
-                entities[i].y = simulationSizeY / 2;
-            }
-            entities[i].initialX = 100;
-            entities[i].initialy = simulationSizeY / 2;
-            entities[i].target = target;
-        }
+        entities[i].initialX = 100;
+        entities[i].initialy = simulationSizeY / 2;
+        entities[i].target = target;
     }
 }
 
 function loadDefaultPreset() {
-    currentPreset = "default";
-    resetSim();
-    resetObstacles();
-    let obsHeight = simulationSizeY * 0.6;
-    obstacles.push(new Obstacle(500, -8, 50, obsHeight, obstacleColor));
-    obstacles.push(new Obstacle(1000, simulationSizeY * 0.4, 50, obsHeight + 8, obstacleColor));
-    redraw();
+    loadPreset1();
 }
 
 function loadPreset1() {
     currentPreset = "preset1";
     resetSim();
     resetObstacles();
-    for (let x = 0; x < 5001; x += 50) {
-        for (let y = 200; y <= simulationSizeY * 0.8; y += 50) {
+    for (let x = 200; x < simulationSizeX - 200; x += 50) {
+        for (let y = 0; y <= simulationSizeY; y += 50) {
             if (Math.random() < 0.6) {
                 let variance = (Math.random() * 40) - 20;
                 obstacles.push(new Obstacle(x + variance, y + variance, 20, 20, obstacleColor));
